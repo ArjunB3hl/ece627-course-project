@@ -75,3 +75,38 @@ The testbench verifies correctness with:
 5. **Backpressure** — Random downstream stalls (~67% ready), verifies no data corruption over 20 windows.
 6. **Uniform Window** — All pixels = 100 and 255, verifies output = K² × pixel_value.
 
+## Resource Utilization and Timing
+
+### VTR (Verilog-to-Routing)
+
+Synthesis and place-and-route performed using VTR with Yosys + Parmys frontend.
+
+**Target Architecture:** `k6_frac_N10_40nm` (6-input fracturable LUT, 40nm technology)
+
+| Configuration | CLBs | Fmax (MHz) | Status |
+|---------------|------|------------|--------|
+| K3_W16_H16    | 144  | 102.88     | OK     |
+| K5_W16_H16    | 324  | 53.10      | OK     |
+| K7_W16_H16    | 625  | 35.86      | OK     |
+
+### Vivado (Xilinx)
+
+| LUTs | FFs  | IOs | WNS (ns) |
+|------|------|-----|----------|
+| ~700 | ~450 | ~52 | 6.474    |
+
+### Analysis
+
+**VTR:**
+- **Dominates system area:** ~70% of total CLBs at K=3
+- **CLBs scale as O(K²):** 9 multipliers (K=3) → 25 (K=5) → 49 (K=7)
+- **Critical timing path:** Adder tree depth limits system Fmax
+  - K=3: 102.88 MHz
+  - K=5: 53.10 MHz (↓48% from K=3)
+  - K=7: 35.86 MHz (↓65% from K=3)
+- The combinational adder tree becomes the bottleneck for larger kernels; further pipelining could improve Fmax at the cost of latency
+
+**Vivado:**
+- Moderate LUT usage (~700) for K² multipliers and adder tree
+- Lower FF count (~450) as pipeline registers are minimal
+- Positive WNS (6.474 ns) indicates comfortable timing margin on Xilinx fabric

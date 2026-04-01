@@ -68,3 +68,35 @@ The testbench uses a small 8×6 image where each pixel value equals `row * IMG_W
 4. **Multiple Frames** — Sends 2 consecutive frames, verifies correct windows in both.
 5. **Visual Inspection** — Prints the first 4 windows for manual verification against expected values.
 
+## Resource Utilization and Timing
+
+### VTR (Verilog-to-Routing)
+
+Synthesis and place-and-route performed using VTR with Yosys + Parmys frontend.
+
+**Target Architecture:** `k6_frac_N10_40nm` (6-input fracturable LUT, 40nm technology)
+
+| Configuration | CLBs | Fmax (MHz) | Status |
+|---------------|------|------------|--------|
+| K3_W8_H8      | 36   | 399.21     | OK     |
+| K3_W16_H16    | 49   | 370.31     | OK     |
+| K3_W32_H32    | 100  | 283.17     | OK     |
+
+### Vivado (Xilinx)
+
+| LUTs | FFs   | IOs | WNS (ns) |
+|------|-------|-----|----------|
+| 3834 | 10450 | 87  | 3.905    |
+
+### Analysis
+
+**VTR:**
+- CLBs scale approximately linearly with image width (row buffer storage)
+- Fmax decreases with larger image widths due to longer row buffer address paths
+- Represents ~24% of total system CLB usage at K3_W16_H16
+- Not the critical timing path (conv_engine is the bottleneck)
+
+**Vivado:**
+- High FF count (10450) reflects row buffer storage mapped to flip-flops
+- Largest resource consumer among all modules in Vivado synthesis
+- Positive WNS (3.905 ns) indicates timing met, though tighter than other modules

@@ -162,6 +162,9 @@ module conv_engine #(
         end
     endgenerate
 
+    // Forward declaration so pipe_advance_s1 can reference it
+    logic                       pipe_advance_s2;
+
     // Backpressure for input
     logic pipe_advance_s1;
     assign pipe_advance_s1 = !valid_s1 || pipe_advance_s2;
@@ -199,7 +202,6 @@ module conv_engine #(
     logic signed [RESULT_W-1:0] sum_s2;
     logic                       valid_s2;
     logic                       tlast_s2;
-    logic                       pipe_advance_s2;
 
     assign pipe_advance_s2 = !valid_s2 || (m_tready);
 

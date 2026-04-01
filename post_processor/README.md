@@ -63,3 +63,33 @@ The testbench verifies all three modes:
 5. **Backpressure** — Random downstream stalls over 30 test values with mixed positive/negative/overflow inputs.
 6. **TLAST Propagation** — Verifies `tlast` passes through correctly and resets for the next frame.
 
+## Resource Utilization and Timing
+
+### VTR (Verilog-to-Routing)
+
+Synthesis and place-and-route performed using VTR with Yosys + Parmys frontend.
+
+**Target Architecture:** `k6_frac_N10_40nm` (6-input fracturable LUT, 40nm technology)
+
+| Configuration | CLBs | Fmax (MHz) | Status |
+|---------------|------|------------|--------|
+| K3_W16_H16    | 9    | 309.15     | OK     |
+
+### Vivado (Xilinx)
+
+| LUTs | FFs | IOs | WNS (ns) |
+|------|-----|-----|----------|
+| 109  | 10  | 51  | 9.029    |
+
+### Analysis
+
+**VTR:**
+- Low resource footprint due to simple arithmetic operations (abs, compare, shift, mux)
+- High Fmax (~309 MHz) — not on the critical timing path
+- Represents ~4% of total system CLB usage
+- Combinational processing with single registered output stage
+
+**Vivado:**
+- Smallest module: only 109 LUTs and 10 FFs
+- Best timing margin (WNS = 9.029 ns) among all modules
+- Simple combinational logic maps efficiently to Xilinx fabric

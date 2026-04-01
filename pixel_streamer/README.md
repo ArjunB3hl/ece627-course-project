@@ -68,4 +68,32 @@ The testbench exercises the module with the following tests using a small 8×6 i
 4. **TLAST and Counter Verification** — Verifies row/column counters match expected values for every pixel.
 5. **Multiple Frames** — Sends 2 back-to-back frames, verifies counters reset correctly between frames.
 
+## Resource Utilization and Timing
 
+### VTR (Verilog-to-Routing)
+
+Synthesis and place-and-route performed using VTR with Yosys + Parmys frontend.
+
+**Target Architecture:** `k6_frac_N10_40nm` (6-input fracturable LUT, 40nm technology)
+
+| Configuration | CLBs | Fmax (MHz) | Status |
+|---------------|------|------------|--------|
+| K3_W16_H16    | 4    | 650.99     | OK     |
+
+### Vivado (Xilinx)
+
+| LUTs  | FFs   | IOs | WNS (ns) |
+|-------|-------|-----|----------|
+| ~1171 | ~2342 | ~43 | 7.511    |
+
+### Analysis
+
+**VTR:**
+- Minimal resource footprint due to simple counter and register logic
+- Highest Fmax among all pipeline stages (~651 MHz)
+- Represents ~2% of total system CLB usage
+- Not on the critical timing path
+
+**Vivado:**
+- Higher LUT/FF count reflects Xilinx-specific mapping and potentially different optimization settings
+- Positive WNS (7.511 ns) indicates timing constraints are comfortably met
